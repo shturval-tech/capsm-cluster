@@ -1,0 +1,189 @@
+apiVersion: controlplane.cluster.x-k8s.io/v1beta2
+kind: KubeadmControlPlane
+metadata:
+  name: {{ .Release.Name }}-control-plane
+  namespace: {{ .Release.Name }}
+  labels:
+    cluster.x-k8s.io/cluster-name:  {{ .Release.Name }}
+    {{- include "capsm-cluster.labels" . | nindent 4 }}
+spec:
+  kubeadmConfigSpec:
+    clusterConfiguration:
+      apiServer:
+        certSANs:
+        - {{ .Values.clusterAPI }}
+        {{- tpl ( include "capsm-cluster.apiserver" . ) . | nindent 8 }}
+        {{- if .Values.secure }}
+        extraVolumes:
+        - hostPath: {{ .Values.auditPolicy.location | quote }}
+          mountPath: {{ .Values.auditPolicy.location | quote }}
+          name: audit
+          pathType: File
+          readOnly: true
+        - hostPath: /var/log/kube-api-audit/
+          mountPath: /var/log/kube-api-audit/
+          name: audit-log
+          pathType: DirectoryOrCreate
+        - hostPath: /etc/kubernetes/secrets_encryption.yaml
+          mountPath: /etc/kubernetes/secrets_encryption.yaml
+          name: secret-encryption
+          pathType: File
+          readOnly: true
+        {{- end }}
+      certificatesDir: /etc/kubernetes/pki
+      controlPlaneEndpoint: {{ .Values.clusterAPI }}:6443
+      {{- include "capsm-cluster.controllerManager" . | nindent 6 }}
+      etcd:
+      {{- if .Values.etcd.external }}
+        external:
+          endpoints:
+          {{- range $_, $v := .Values.etcd.external.endpoints }}
+            - {{ $v | quote }}
+          {{- end }}
+          caFile: "/etc/kubernetes/pki/etcd/ca.crt"
+          certFile: "/etc/kubernetes/pki/etcd/healthcheck-client.crt"
+          keyFile: "/etc/kubernetes/pki/etcd/healthcheck-client.key"
+      {{- else }}
+        local:
+          {{- $etcdLocal := omit .Values.etcd.local "extraArgs" }}
+          {{- toYaml $etcdLocal | nindent 10 }}
+          {{- if .Values.etcd.local.extraArgs }}
+          {{- $etcdArgs := dict }}
+          {{- include "capsm-cluster.extraArgs.absorb" (dict "out" $etcdArgs "items" .Values.etcd.local.extraArgs) }}
+          {{- if $etcdArgs }}
+          extraArgs:
+            {{- include "capsm-cluster.extraArgs.render" (dict "items" $etcdArgs "root" .) | trim | nindent 12 }}
+          {{- end }}
+          {{- end }}
+      {{- end }}
+      imageRepository: {{ .Values.systemregistry }}
+      {{- include "capsm-cluster.scheduler" . | nindent 6 }}
+    {{- $kp := include "capsm-cluster.kubeadmPatchesEffective" . | fromYaml }}
+    {{- $kpDir := index $kp "directory" | default "" }}
+    files:
+    - content: {{ include "capsm-cluster.authCert" . }}
+      encoding: base64
+      owner: root:root
+      path: /etc/ssl/certs/oidc.crt
+      permissions: "0644"
+    - content: {{ include "capsm-cluster.nci.json.b64" (dict "ctx" . "controlplane" true) | quote }}
+      encoding: base64
+      owner: root:root
+      path: /etc/std/nci.json
+      permissions: "0600"
+    {{- range $name, $patch := $kp }}
+    {{- if and (kindIs "map" $patch) $patch.patchTemplate $kpDir }}
+    - content: {{ tpl ($.Files.Get $patch.patchTemplate) $ | b64enc | quote }}
+      encoding: base64
+      owner: root:root
+      path: {{ printf "%s/%s" $kpDir (include "capsm-cluster.kubeadmPatchFilename" (dict "name" $name "patch" $patch)) }}
+      permissions: "0644"
+    {{- end }}
+    {{- end }}
+    {{- if .Values.etcd.external }}
+    - content: {{ include "capsm-cluster.etcd.caCrt" . }}
+      encoding: base64
+      owner: root:root
+      path: /etc/kubernetes/pki/etcd/ca.crt
+      permissions: "0644"
+    - content: {{ include "capsm-cluster.etcd.apiCrt" . }}
+      encoding: base64
+      owner: root:root
+      path: /etc/kubernetes/pki/etcd/healthcheck-client.crt
+      permissions: "0644"
+    - content: {{ include "capsm-cluster.etcd.apiKey" . }}
+      encoding: base64
+      owner: root:root
+      path: /etc/kubernetes/pki/etcd/healthcheck-client.key
+      permissions: "0644"
+    {{- end }}
+    format: cloud-config
+    initConfiguration:
+      {{- if $kpDir }}
+      patches:
+        directory: {{ $kpDir | quote }}
+      {{- end }}
+      nodeRegistration:
+        criSocket: unix:///run/containerd/containerd.sock
+        imagePullPolicy: IfNotPresent
+        {{- $nodeLabels := include "capsm-cluster.nodeLabels" .Values.master.labels }}
+        {{- if $nodeLabels }}
+        kubeletExtraArgs:
+        - name: node-labels
+          value: {{ $nodeLabels | quote }}
+        {{- end }}
+        {{- if .Values.master.taints }}
+        taints: {{- toYaml .Values.master.taints | nindent 8 }}
+        {{- end }}
+      skipPhases:
+      - addon/kube-proxy
+    joinConfiguration:
+      {{- if $kpDir }}
+      patches:
+        directory: {{ $kpDir | quote }}
+      {{- end }}
+      nodeRegistration:
+        criSocket: unix:///run/containerd/containerd.sock
+        imagePullPolicy: IfNotPresent
+        {{- $nodeLabels := include "capsm-cluster.nodeLabels" .Values.master.labels }}
+        {{- if $nodeLabels }}
+        kubeletExtraArgs:
+        - name: node-labels
+          value: {{ $nodeLabels | quote }}
+        {{- end }}
+        {{- if .Values.master.taints }}
+        taints: {{- toYaml .Values.master.taints | nindent 8 }}
+        {{- end }}
+    postKubeadmCommands:
+    - if [ ! -f /etc/kubernetes/super-admin.conf ]; then ln -s /etc/kubernetes/admin.conf
+      /etc/kubernetes/super-admin.conf ; fi
+    preKubeadmCommands:
+    - sudo mkdir -p /etc/kubernetes
+    - while [ "$(systemctl is-active containerd)" != "active" ]; do echo "Waiting for containerd to come up..."; sleep 3; done
+    - while [ "$(sudo std node status)" != "synched" ]; do echo "Waiting for shturvald to be synced..."; sleep 3; done
+    - |-
+      if [ -f /run/kubeadm/kubeadm.yaml ]; then echo '---
+      apiVersion: kubelet.config.k8s.io/v1beta1
+      kind: KubeletConfiguration
+      {{- include "capsm-cluster.kubelet" . | nindent 6 }}
+      {{- with .Values.master.KubeletConfiguration -}}
+      {{ toYaml . | nindent 6 }}
+      {{- end -}}
+      ' >> /run/kubeadm/kubeadm.yaml; fi
+    - |-
+      if [ -f /run/kubeadm/kubeadm-join-config.yaml ]; then echo '---
+      apiVersion: kubelet.config.k8s.io/v1beta1
+      kind: KubeletConfiguration
+      {{- include "capsm-cluster.kubelet" . | nindent 6 }}
+      {{- with .Values.master.KubeletConfiguration -}}
+      {{ toYaml . | nindent 6 }}
+      {{- end -}}
+      ' >> /run/kubeadm/kubeadm-join-config.yaml; fi
+  machineTemplate:
+    {{- if or .Values.master.labels .Values.master.annotations }}
+    metadata:
+      {{- if .Values.master.labels }}
+      labels:
+        {{- include "capsm-cluster.kvListToMetadata" .Values.master.labels | trim | nindent 8 }}
+      {{- end }}
+      {{- if .Values.master.annotations }}
+      annotations:
+        {{- include "capsm-cluster.kvListToMetadata" .Values.master.annotations | trim | nindent 8 }}
+      {{- end }}
+    {{- end }}
+    spec:
+      deletion:
+        nodeDeletionTimeoutSeconds: 600
+        nodeDrainTimeoutSeconds: 600
+        nodeVolumeDetachTimeoutSeconds: 300
+      infrastructureRef:
+        apiGroup: infrastructure.cluster.x-k8s.io
+        kind: ShturvalMachineTemplate
+        name: {{ .Release.Name }}-control-plane
+  replicas: {{ .Values.master.replicas }}
+  rollout:
+    strategy:
+      rollingUpdate:
+        maxSurge: 1
+      type: RollingUpdate
+  version: v{{ .Values.kubeVersion }}

@@ -1,0 +1,17 @@
+apiVersion: infrastructure.cluster.x-k8s.io/v1beta1
+kind: ShturvalProvider
+metadata:
+  name: {{ include "capsm-cluster.capsm.profileName" . }}
+  labels:
+    {{- include "capsm-cluster.labels" . | nindent 4 }}
+spec:
+  paused: false
+  credentials:
+    secretRef:
+      name: {{ include "capsm-cluster.capsm.profileName" . }}-capsm-v2-provider-secret
+      namespace: shturval-capsm
+  hosts:
+    {{- include "capsm-cluster.capsm.hosts" . | nindent 4 }}
+  licenseToken: {{ .Values.licensetoken }}
+  releaseVersion: {{ .Values.shturvalReleaseVersion }}
+  systemRegistry: {{ .Values.systemregistry }}

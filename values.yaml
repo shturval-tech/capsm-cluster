@@ -1,0 +1,469 @@
+# Лицензия Штурвала
+licensetoken: "XXXXXXXX"
+# Имя хоста с зеркалом Штурвала
+systemregistry: myregistry.domain.tld
+
+# shturvalReleaseVersion: 2.11.0
+# kubeVersion: 1.33.1
+# shturvalReleaseVersion: 2.12.1
+# kubeVersion: 1.34.1
+shturvalReleaseVersion: 2.14.0 # Версия устанавливаемого кластера Штурвал
+kubeVersion: 1.35.1 # Версия устанавливаемого кубернетеса
+
+# Актуальные образы в 2.14 для bootstrap NCI (pause / kube-vip)
+images:
+  pause: r.shturval.tech/pause:3.10.1
+  kubeVip: r.shturval.tech/kube-vip:v1.0.4-280041
+  # clusterAutoscaler: r.shturval.tech/autoscaling/cluster-autoscaler:v1.35.1 # по умолчанию: r.shturval.tech/autoscaling/cluster-autoscaler:v{{ kubeVersion }}
+
+services:
+  # Минимальный набор сервисов для 2.14 - значение применятся только в момент инициализации кластера и изменения ни к чему не приведут
+  enabledservices:
+  - shturval-node-config
+  - shturval-trust-manager
+  - shturval-node-config-crds
+  - shturval-snapshotter
+  - shturval-metrics-collector-crds
+  - shturval-vip-provider
+  - shturval-caching-dns
+  - shturval-vip
+  - shturval-networking
+  - shturval-policy-manager-crds
+  - shturval-cert-manager
+  - shturval-services-crds
+  - shturval-snapshotter-crds
+  - shturval-services
+  - shturval-trust-manager-crds
+  - shturval-monitoring-crds
+  - shturval-update
+  - shturval-ingress-controller
+  - shturval-local-csi
+  - shturval-update-crds
+  - shturval-cert-manager-crds
+  disablesservices:
+  - shturval-metrics-collector
+  - shturval-log-collector-crds
+  - shturval-backup
+  - shturval-scanner
+  - shturval-cd
+  - shturval-policy-manager
+  - shturval-scanner-crds
+  - shturval-rollouts
+  - shturval-cd-crds
+  - shturval-rollouts-crds
+  - shturval-gateway-api-crds
+  - shturval-descheduler
+  - shturval-backup-crds
+  - shturval-log-collector
+  - shturval-cert-expiration
+
+  # Минимальный набор сервисов для 2.13 - значение применятся только в момент инициализации кластера и изменения ни к чему не приведут
+  # enabledservices:
+  # - shturval-trust-manager
+  # - shturval-monitoring-crds
+  # - shturval-ingress-controller
+  # - shturval-update-crds
+  # - shturval-local-csi
+  # - shturval-node-config-crds
+  # - shturval-cert-manager
+  # - shturval-update
+  # - shturval-vip
+  # - shturval-node-config
+  # - shturval-trust-manager-crds
+  # - shturval-services
+  # - shturval-caching-dns
+  # - shturval-cert-manager-crds
+  # - shturval-networking
+  # - shturval-snapshotter
+  # - shturval-services-crds
+  # - shturval-snapshotter-crds
+  # - shturval-metrics-collector-crds
+  # - shturval-policy-manager-crds
+  # - shturval-vip-provider
+  # disablesservices:
+  # - shturval-scanner-crds
+  # - shturval-backup-crds
+  # - shturval-metrics-collector
+  # - shturval-policy-manager
+  # - shturval-cd
+  # - shturval-cd-crds
+  # - shturval-scanner
+  # - shturval-cert-expiration
+  # - shturval-rollouts-crds
+  # - shturval-log-collector
+  # - shturval-rollouts
+  # - shturval-log-collector-crds
+  # - shturval-descheduler
+  # - shturval-backup
+
+  # Минимальный набор сервисов для 2.12 - значение применятся только в момент инициализации кластера и изменения ни к чему не приведут
+  # enabledservices:
+  # - shturval-trust-manager
+  # - shturval-monitoring-crds
+  # - shturval-ingress-controller
+  # - shturval-update-crds
+  # - shturval-local-csi
+  # - shturval-node-config-crds
+  # - shturval-cert-manager
+  # - shturval-update
+  # - shturval-vip
+  # - shturval-node-config
+  # - shturval-trust-manager-crds
+  # - shturval-services
+  # - shturval-caching-dns
+  # - shturval-cert-manager-crds
+  # - shturval-networking
+  # - shturval-snapshotter
+  # - shturval-services-crds
+  # - shturval-snapshotter-crds
+  # - shturval-metrics-collector-crds
+  # - shturval-policy-manager-crds
+  # - shturval-vip-provider
+  # disablesservices:
+  # - shturval-scanner-crds
+  # - shturval-backup-crds
+  # - shturval-metrics-collector
+  # - shturval-policy-manager
+  # - shturval-cd
+  # - shturval-cd-crds
+  # - shturval-scanner
+  # - shturval-cert-expiration
+  # - shturval-rollouts-crds
+  # - shturval-log-collector
+  # - shturval-rollouts
+  # - shturval-log-collector-crds
+  # - shturval-descheduler
+  # - shturval-backup
+
+  # Минимальный набор сервисов для 2.11 - значение применятся только в момент инициализации кластера и изменения ни к чему не приведут
+  # enabledservices:
+  # - shturval-caching-dns
+  # - shturval-cert-manager
+  # - shturval-cert-manager-crds
+  # - shturval-ingress-controller
+  # - shturval-local-csi
+  # - shturval-metrics-collector-crds
+  # - shturval-monitoring-crds
+  # - shturval-networking
+  # - shturval-node-config
+  # - shturval-node-config-crds
+  # - shturval-policy-manager-crds
+  # - shturval-services
+  # - shturval-services-crds
+  # - shturval-snapshotter
+  # - shturval-snapshotter-crds
+  # - shturval-trust-manager
+  # - shturval-trust-manager-crds
+  # - shturval-update
+  # - shturval-update-crds
+  # - shturval-vip
+  # - shturval-vip-provider
+  # disablesservices:
+  # - shturval-backup
+  # - shturval-backup-crds
+  # - shturval-cd
+  # - shturval-cd-crds
+  # - shturval-cert-expiration
+  # - shturval-dashboards
+  # - shturval-descheduler
+  # - shturval-log-collector
+  # - shturval-log-collector-crds
+  # - shturval-metrics-collector
+  # - shturval-policy-manager
+  # - shturval-rollouts
+  # - shturval-rollouts-crds
+  # - shturval-scanner
+  # - shturval-scanner-crds
+
+
+# Конфигурация etcd
+etcd:
+  external: {}
+    # endpoints:
+    #   - "https://10.31.145.174:2379"
+    # caCrt: "conf/ext_etcd-ca.crt" # CA сертификат от ETCD
+    # apiCrt: "conf/ext_etcd-client.crt" # Клиентский сертификат для подключения к ETCD
+    # apiKey: "conf/ext_etcd-client.key" # Ключ от клиентского сертификата для подключения к ETCD
+  local:
+    dataDir: /var/lib/etcd
+    imageTag: v3.6.7
+    # extraArgs: {}
+
+# Инициализация узлов (ShturvalInit / nci.json)
+# Интерфейс для kube-vip VIP; образы pause/kube-vip задаются в images.*
+nodeInit:
+  kubevip:
+    # Сетевой интерфейс на master-узле для kube-vip VIP (обычно основной интерфейс хоста)
+    interface: "eth0"
+
+# Настройки для провайдера CAPSM
+capsm:
+  profileName: "" # имя создаваемого профиля провайдера CAPSM (если не указан, то используется имя релиза)
+  sshUser: root # ssh юзер для подключения к хостам кластера
+  sshKeyPath: "conf/stc.key" # путь к ssh ключу
+  hosts: # группы и хосты кластера
+    master: # основной лейбл хостов shturvalHost (role: master)
+      labels: # дополнительные лейблы - изменение не влияет на уже созданные узлы
+        foo: bar
+        foo2: bar1
+      address: # хосты добавляемые в пул кластера с перечисленными лейблами - добавление хостов не влияет на клиентский кластер
+        - 10.31.145.102
+        - 10.31.145.140
+        - 10.31.145.55
+    worker: # основной лейбл хостов shturvalHost (role: worker)
+      labels: # дополнительные лейблы - изменение не влияет на уже созданные узлы
+        foo: bar
+        foo2: bar2
+      address: # хосты добавляемые в пул кластера с перечисленными лейблами - добавление хостов не влияет на клиентский кластер
+        - 10.31.145.130
+        - 10.31.145.106
+    infra: # основной лейбл хостов shturvalHost (role: infra)
+      labels: # дополнительные лейблы - изменение не влияет на уже созданные узлы
+        foo: bar
+        foo2: bar3
+      address: [] # хосты добавляемые в пул кластера с перечисленными лейблами - добавление хостов не влияет на клиентский кластер
+        # - 10.31.145.57
+        # - 10.31.145.105
+        # - 10.31.145.xxx
+        # - 10.31.145.xxx
+    ingress: # основной лейбл shturvalHost (role: ingress)
+      labels: # дополнительные лейблы - изменение не влияет на уже созданные узлы
+        foo: bar
+        foo2: bar4
+      address: [] # хосты добавляемые в пул кластера с перечисленными лейблами - добавление хостов не влияет на клиентский кластер
+        # - 10.31.145.xxx
+        # - 10.31.145.xxx
+        # - 10.31.145.xxx
+
+master: # конфигурация control plane
+  hostSelector: # селектор хостов (shturvalHost CAPSM провайдера) по условию/выражению - изменение не влияет на уже созданные узлы
+    # matchExpressions:
+    # - key: hostname
+    #   operator: In
+    #   values:
+    #   - shturval-rsuslov2-m0
+    #   - shturval-rsuslov2-m1
+    #   - shturval-rsuslov2-m2
+    matchLabels: # селектор хостов (shturvalHost CAPSM провайдера) по лейблу - изменение не влияет на уже созданные узлы
+      role: master
+  replicas: 1 # кол-во мастеров
+  # labels: # лейблы Machine/Node (список key=value) → KubeadmControlPlane.spec.machineTemplate.metadata.labels; для kubelet игнорируются ключи с kubernetes.io/ и k8s.io/
+  #   - "node.longhorn.io/create-default-disk=false"
+  #   - "my-custom-label-for-master=myvalue"
+  # annotations: # аннотации Machine (список key=value) → KubeadmControlPlane.spec.machineTemplate.metadata.annotations
+  #   - "example.org/anno=value"
+  # taints: # taint которые будут назначены узлам данной группы в подчиненом кластере
+  #   - key: mytain/master
+  #     effect: NoSchedule
+
+  # machineHealthCheck:
+  #   enabled: false
+  #   checks:
+  #     nodeStartupTimeoutSeconds: 0
+  #     unhealthyNodeConditions:
+  #       - status: Unknown
+  #         timeoutSeconds: 600
+  #         type: Ready
+  #       - status: "False"
+  #         timeoutSeconds: 600
+  #         type: Ready
+  #   remediation:
+  #     triggerIf:
+  #       unhealthyLessThanOrEqualTo: 100%
+
+workerNodes: # динамическая конфигурация worker групп в зависимости от перечисленных здесь групп
+  workers: # имя группы
+    hostSelector: # селектор хостов (shturvalHost CAPSM провайдера) по условию/выражению - изменение не влияет на уже созданные узлы
+      # matchExpressions:
+      # - key: hostname
+      #   operator: In
+      #   values:
+      #   - shturval-rsuslov2-w0
+      #   - shturval-rsuslov2-w1
+      matchLabels: # селектор хостов (shturvalHost CAPSM провайдера) по лейблу - изменение не влияет на уже созданные узлы
+        role: worker
+    replicas: 2 # кол-во узлов в группе; при autoscaling.enabled — минимум (min-size)
+    # autoscaling: # автомасштабирование группы через Cluster API cluster-autoscaler
+    #   enabled: true
+    #   maxMachines: 6 # максимум узлов (аннотация cluster.x-k8s.io/cluster-api-autoscaler-node-group-max-size); минимум = replicas
+    #   # Нужен запас свободных хостов в пуле CAPSM (hostSelector) — autoscaler не создаёт ВМ, только берёт свободные ShturvalHost.
+    #   # На management-кластере должен существовать ClusterRole shturval-cluster-autoscaler (ставит платформа).
+    #   # При enabled чарт не пишет MachineDeployment.spec.replicas (владеет autoscaler) — иначе helm-diff/template даёт вечный drift.
+    labels: # лейблы Machine/Node (список key=value); также попадают в MachineDeployment.spec.template.metadata.labels. Для kubelet игнорируются ключи с kubernetes.io/ и k8s.io/
+      - "node.longhorn.io/create-default-disk=true"
+      - "my-custom-label-for-worker=myvalue"
+    # annotations: # аннотации Machine (список key=value) → MachineDeployment.spec.template.metadata.annotations
+    #   - "example.org/anno=value"
+    # taints: # taint которые будут назначены узлам данной группы в подчиненом кластере
+    #   - key: mytain/worker
+    #     effect: NoSchedule
+
+    # machineHealthCheck:
+    #   enabled: true
+    #   checks:
+    #     nodeStartupTimeoutSeconds: 0
+    #     unhealthyNodeConditions:
+    #       - status: Unknown
+    #         timeoutSeconds: 600
+    #         type: Ready
+    #       - status: "False"
+    #         timeoutSeconds: 600
+    #         type: Ready
+    #   remediation:
+    #     triggerIf:
+    #       unhealthyLessThanOrEqualTo: 40%
+  infra: # имя группы
+    hostSelector: # селектор хостов (shturvalHost CAPSM провайдера) по условию/выражению - изменение не влияет на уже созданные узлы
+      # matchExpressions:
+      # - key: hostname
+      #   operator: In
+      #   values:
+      #   - shturval-rsuslov2-w0
+      #   - shturval-rsuslov2-w1
+      matchLabels: # селектор хостов (shturvalHost CAPSM провайдера) по лейблу - изменение не влияет на уже созданные узлы
+        role: infra
+    replicas: 3
+    labels: # лейблы которые будут назначены узлам данной группы в подчиненом кластере (запрещены и будут проигнорированы лейблы с ключами kubernetes.io/ и k8s.io/)
+      - "my-custom-label-for-infra=myvalue"
+    # taints: # taint которые будут назначены узлам данной группы в подчиненом кластере
+    #   - key: mytain/infra
+    #     effect: NoSchedule
+
+    # machineHealthCheck:
+    #   enabled: false
+    #   checks:
+    #     nodeStartupTimeoutSeconds: 0
+    #     unhealthyNodeConditions:
+    #       - status: Unknown
+    #         timeoutSeconds: 600
+    #         type: Ready
+    #       - status: "False"
+    #         timeoutSeconds: 600
+    #         type: Ready
+    #   remediation:
+    #     triggerIf:
+    #       unhealthyLessThanOrEqualTo: 40%
+  ingress:
+    replicas: 1
+    labels: # лейблы которые будут назначены узлам данной группы в подчиненом кластере (запрещены и будут проигнорированы лейблы с ключами kubernetes.io/ и k8s.io/)
+      - "istio.ingress=enable"
+    taints: # taint которые будут назначены узлам данной группы в подчиненом кластере
+      - key: node-role.kubernetes.io/ingress
+        effect: NoSchedule
+    hostSelector: # селектор хостов (shturvalHost CAPSM провайдера) по условию/выражению - изменение не влияет на уже созданные узлы
+      matchLabels: # селектор хостов (shturvalHost CAPSM провайдера) по лейблу - изменение не влияет на уже созданные узлы
+        role: ingress
+    
+# Сеть подов в кластере
+podCIDR: 172.16.0.0/16
+# Сеть сервисов в кластере
+serviceCIDR: 10.96.0.0/12
+
+# IP адреса который будет использоваться в кластере для clusterAPI (kube-apiserver) или к которому будет происходить подключение если используется внешний балансировщик
+clusterAPI: 10.31.145.172
+# Указываем используется ли внешний балансировщик для clusterAPI или нет
+useExternalKubeAPILB: false
+
+# Ингресс записи от менеджмент кластера (чтобы понимать куда обращаться за аутентификацией, отправкой метрик/логов) - значение применятся только в момент инициализации кластера и изменения ни к чему не приведут
+authMgmtIngress: "shturval.app.ip-10-31-145-175.shturval.link" # auth.apps - использовался в 2.10 и ниже, shturval.apps - используется в свежих инсталляциях 2.11 и выше
+logsMgmtIngress: "logs.app.ip-10-31-145-175.shturval.link"
+metricsMgmtIngress: "vminsert.app.ip-10-31-145-175.shturval.link"
+
+# Путь до root СА сертификата от auth.apps.ingress.management.cluster - изменение содержимого файла приведет к редеплою всего кластера
+authCrtFile: "conf/auth.crt"
+
+# Ингресс запись создаваемого кластера (необходим для преднастройки устанавливаемых сервисов)
+ingress: "app.ip-10-31-145-173.shturval.link"
+# IP адрес используемый для Ingress контроллера или внешнего балансировщика - значение применятся только в момент инициализации кластера и изменения ни к чему не приведут
+ingressVip: 10.31.145.173
+# Указываем используется ли внешний балансировщик для Ingressили нет - значение применятся только в момент инициализации кластера и изменения ни к чему не приведут
+useExternalIngressLB: false
+
+# Путь до конфигурации кластера (конфигурация для capsm и backend) - значение применятся только в момент инициализации кластера и изменения ни к чему не приведут
+clusterConfigFile: "conf/clusterConfig.yaml"
+
+auditPolicy:
+  # Путь до шаблона audit конфигурации
+  template: "conf/audit_policy_template.yaml"
+  # Путь расположения файла audit на master нодах
+  # Если использовать наш дефолтный путь /etc/kubernetes/audit_policy.yaml, то после инициализации кластера shturvald сразу же его перезапишет на Штурвальную конфигурацию.
+  # Поэтому либо сменить имя файла, либо в дальнейшем переопределить содержимое с помощью NCI.
+  location: "/etc/kubernetes/audit_policy.yaml"
+
+
+# Kubeadm patches — патчи для компонентов control plane (kube-apiserver, etcd и любые другие).
+# Каждый ключ кроме directory — отдельный файл в каталоге патчей.
+# Обязательно: patchTemplate. Опционально: filename (для kubeapi по умолчанию kube-apiserver.yaml, иначе <ключ>.yaml).
+# Документация: https://kubernetes.io/docs/setup/production-environment/tools/kubeadm/control-plane-flags/#patches
+kubeadmPatches:
+  # Директория с патчами на узле. Создаётся через NCI (ShturvalInit).
+  # Обязательно задать, если ниже перечислены патчи.
+  # Рекомендуемое значение: "/etc/kubernetes/manifests-pathes"
+  directory: ""
+  # kubeapi:
+  #   patchTemplate: "conf/kube-apiserver.yaml" # Путь до шаблона патча kube-apiserver
+  #   resources:
+  #     limits:
+  #       memory: "1024Mi"
+  #       cpu: "2"
+  #     requests:
+  #       memory: "500Mi"
+  #       cpu: "250m"
+  # etcd:
+  #   patchTemplate: "conf/etcd.yaml" # Путь до шаблона патча etcd
+  #   resources:
+  #     limits:
+  #       memory: "500Mi"
+  #       cpu: "2"
+  #       example.com/device: "1"
+  #     requests:
+  #       memory: "500Mi"
+  #       cpu: "2"
+  #       example.com/device: "1"
+
+# Настройка NTP - значения применяются только в момент инициализации кластера и изменения ни к чему не приведут
+ntp:
+  ntpservers: []
+  timezone: Europe/Moscow
+
+# secure installation (включение аудита, шифрование etcd и тд)
+secure: true
+
+# Пароль для подключения к opensearch (отправка логов)
+opensearchfluentbitpass: "mysecretpassword"
+
+# Установка сабчарта для настройки VMAlert и VMRule (VictoriaMetrics) в менджмент кластере под клиентский кластер
+capsm-cluster-vm:
+  enable: false
+
+# Установка сабчарта для добавления клиентского кластера (datasources) в grafana менджмент кластера
+capsm-cluster-grafana:
+  enable: false
+
+# Конфигурация ClusterConfig CR
+clusterConfigProfileName: "" # имя профиля кластера (если не указан, используется default-client-cluster-profile)
+clusterType: "client" # тип кластера: client или platform (management)
+
+# Конфигурация CSI в ClusterConfig (по умолчанию shturval-local-csi без провайдерного секрета)
+# csi:
+#   - defaultStorageClass: true
+#     serviceConfigName: shturval-local-csi
+#   - defaultStorageClass: false
+#     serviceConfigName: shturval-capvs-csi
+#     providerSecretRef:
+#       name: vsphere-csi-ssc
+#       namespace: mycluster
+
+# Конфигурация ACME для ingress сертификатов в ClusterConfig
+# acme:
+#   serverURL: "https://issuer.example.com/acme/directory"
+#   rootCABundle: "<base64>"
+#   email: "admin@example.com"
+
+# Wildcard сертификат для ingress (base64)
+# ingressCert: ""
+# ingressKey: ""
+
+# Intermediate CA для ingress (base64)
+# caCert: ""
+# caKey: ""

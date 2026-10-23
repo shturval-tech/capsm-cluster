@@ -1,0 +1,81 @@
+{{- range $k, $v := .Values.workerNodes }}
+apiVersion: bootstrap.cluster.x-k8s.io/v1beta2
+kind: KubeadmConfigTemplate
+metadata:
+  name: {{ $.Release.Name }}-{{ $k }}
+  namespace: {{ $.Release.Name }}
+  labels:
+    cluster.x-k8s.io/cluster-name:  {{ $.Release.Name }}
+    {{- include "capsm-cluster.labels" $ | nindent 4 }}
+spec:
+  template:
+    spec:
+      files:
+      - content: {{ include "capsm-cluster.authCert" $ }}
+        encoding: base64
+        owner: root:root
+        path: /etc/ssl/certs/oidc.crt
+        permissions: "0644"
+      - content: {{ include "capsm-cluster.nci.json.b64" (dict "ctx" $ "controlplane" false) | quote }}
+        encoding: base64
+        owner: root:root
+        path: /etc/std/nci.json
+        permissions: "0600"
+      {{- if $.Values.etcd.external }}
+      - content: {{ include "capsm-cluster.etcd.caCrt" $ }}
+        encoding: base64
+        owner: root:root
+        path: /etc/kubernetes/pki/etcd/ca.crt
+        permissions: "0644"
+      - content: {{ include "capsm-cluster.etcd.apiCrt" $ }}
+        encoding: base64
+        owner: root:root
+        path: /etc/kubernetes/pki/etcd/healthcheck-client.crt
+        permissions: "0644"
+      - content: {{ include "capsm-cluster.etcd.apiKey" $ }}
+        encoding: base64
+        owner: root:root
+        path: /etc/kubernetes/pki/etcd/healthcheck-client.key
+        permissions: "0644"
+      {{- end }}
+      format: cloud-config
+      joinConfiguration:
+        nodeRegistration:
+          criSocket: unix:///run/containerd/containerd.sock
+          imagePullPolicy: IfNotPresent
+          {{- $nodeLabels := include "capsm-cluster.nodeLabels" .labels }}
+          {{- if $nodeLabels }}
+          kubeletExtraArgs:
+          - name: node-labels
+            value: {{ $nodeLabels | quote }}
+          {{- end }}
+          {{- if .taints }}
+          taints: {{- toYaml .taints | nindent 10 }}
+          {{- end }}
+      postKubeadmCommands:
+      - if [ ! -f /etc/kubernetes/super-admin.conf ]; then ln -s /etc/kubernetes/admin.conf
+        /etc/kubernetes/super-admin.conf ; fi
+      preKubeadmCommands:
+      - sudo mkdir -p /etc/kubernetes
+      - while [ "$(systemctl is-active containerd)" != "active" ]; do echo "Waiting for containerd to come up..."; sleep 3; done
+      - while [ "$(sudo std node status)" != "synched" ]; do echo "Waiting for shturvald to be synced..."; sleep 3; done
+      - |-
+        if [ -f /run/kubeadm/kubeadm.yaml ]; then echo '---
+        apiVersion: kubelet.config.k8s.io/v1beta1
+        kind: KubeletConfiguration
+        {{- include "capsm-cluster.kubelet" . | nindent 8 }}
+        {{- with .KubeletConfiguration -}}
+        {{ toYaml . | nindent 8 }}
+        {{- end -}}
+        ' >> /run/kubeadm/kubeadm.yaml; fi
+      - |-
+        if [ -f /run/kubeadm/kubeadm-join-config.yaml ]; then echo '---
+        apiVersion: kubelet.config.k8s.io/v1beta1
+        kind: KubeletConfiguration
+        {{- include "capsm-cluster.kubelet" . | nindent 8 }}
+        {{- with .KubeletConfiguration -}}
+        {{ toYaml . | nindent 8 }}
+        {{- end -}}
+        ' >> /run/kubeadm/kubeadm-join-config.yaml; fi
+---
+{{- end }}

@@ -1,0 +1,16 @@
+apiVersion: infrastructure.cluster.x-k8s.io/v1beta1
+kind: ShturvalCluster
+metadata:
+  name: {{ .Release.Name }}
+  namespace: {{ .Release.Name }}
+  labels:
+    cluster.x-k8s.io/cluster-name: {{ .Release.Name | quote }}
+    {{- include "capsm-cluster.labels" . | nindent 4 }}
+spec:
+  controlPlaneEndpoint:
+    host: {{ .Values.clusterAPI }}
+    port: 6443
+  deployKeepAlive: {{ not .Values.useExternalKubeAPILB }}
+  ingress: {{ printf "*.%s" .Values.ingress | quote }}
+  providerConfigName: {{ include "capsm-cluster.capsm.profileName" . }}
+  secure: {{ .Values.secure }}
