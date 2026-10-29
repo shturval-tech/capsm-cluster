@@ -21,8 +21,10 @@ version: 0.1.0
 appVersion: "0.1.0"
 dependencies:
   - name: capsm-cluster-vm
+    version: 0.1.0
     repository: capsm-cluster-vm
     condition: capsm-cluster-vm.enable
   - name: capsm-cluster-grafana
+    version: 0.1.0
     repository: capsm-cluster-grafana
     condition: capsm-cluster-grafana.enable
