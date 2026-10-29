@@ -3,10 +3,8 @@ kind: VMAlertmanagerConfig
 metadata:
   name: vmalertmanagerconfig-{{ include "capsm-cluster-vm.monitoringid" . }}
   namespace: {{ .Release.Name }}
-  labels:
-  {{- include "capsm-cluster-vm.labels" . | nindent 4 }}
 spec:
   receivers:
   - name: devnull
   route:
-    receiver: ""
+    receiver: devnull
