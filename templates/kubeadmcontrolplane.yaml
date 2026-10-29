@@ -45,7 +45,7 @@ spec:
           keyFile: "/etc/kubernetes/pki/etcd/healthcheck-client.key"
       {{- else }}
         local:
-          {{- $etcdLocal := omit .Values.etcd.local "extraArgs" }}
+          {{- $etcdLocal := omit (merge (dict "imageTag" (include "capsm-cluster.etcdImageTag" .)) (.Values.etcd.local | default dict)) "extraArgs" }}
           {{- toYaml $etcdLocal | nindent 10 }}
           {{- if .Values.etcd.local.extraArgs }}
           {{- $etcdArgs := dict }}
@@ -55,6 +55,10 @@ spec:
             {{- include "capsm-cluster.extraArgs.render" (dict "items" $etcdArgs "root" .) | trim | nindent 12 }}
           {{- end }}
           {{- end }}
+      {{- end }}
+      {{- if include "capsm-cluster.coreDNSTag" . }}
+      dns:
+        imageTag: {{ include "capsm-cluster.coreDNSTag" . | quote }}
       {{- end }}
       imageRepository: {{ .Values.systemregistry }}
       {{- include "capsm-cluster.scheduler" . | nindent 6 }}
@@ -186,4 +190,4 @@ spec:
       rollingUpdate:
         maxSurge: 1
       type: RollingUpdate
-  version: v{{ .Values.kubeVersion }}
+  version: v{{ include "capsm-cluster.effectiveKubeVersion" . }}

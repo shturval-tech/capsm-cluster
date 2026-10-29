@@ -9,4 +9,4 @@ spec:
   receivers:
   - name: devnull
   route:
-    receiver: ""
+    receiver: devnull
