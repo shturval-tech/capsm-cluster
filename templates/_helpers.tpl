@@ -146,11 +146,21 @@ Same contract as backend: Secret.data.secret = raw key.
 */}}
 {{- define "capsm-cluster.encryptionKey" -}}
 {{- if not .Values._encryptionKey -}}
-{{- $key := randAscii 32 -}}
+{{- $key := "" -}}
 {{- $secretName := printf "%s-encryption-configuration" .Release.Name -}}
 {{- $existing := lookup "v1" "Secret" .Release.Name $secretName -}}
 {{- if and $existing $existing.data $existing.data.secret -}}
 {{- $key = index $existing.data "secret" | b64dec -}}
+{{- else if .Values.etcd.encryptionSeed -}}
+{{- $key = sha256sum (printf "%s:%s-encryption-key" (toString .Values.etcd.encryptionSeed) .Release.Name) | trunc 32 -}}
+{{- else -}}
+{{- $cc := lookup "cluster.shturval.tech/v1beta1" "ClusterConfig" .Release.Name .Release.Name -}}
+{{- if and $cc $cc.spec -}}
+{{- /* Апгрейд существующего кластера: ключ не меняем. */ -}}
+{{- $key = sha256sum (printf "%s-encryption-key" .Release.Name) | trunc 32 -}}
+{{- else -}}
+{{- fail (printf "новый кластер %s: задайте etcd.encryptionSeed в values (случайная строка, например `openssl rand -base64 32`). Без seed шифрование etcd не будет безопасным." .Release.Name) -}}
+{{- end -}}
 {{- end -}}
 {{- $_ := set .Values "_encryptionKey" $key -}}
 {{- end -}}
