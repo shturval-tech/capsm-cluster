@@ -53,8 +53,7 @@ spec:
           taints: {{- toYaml .taints | nindent 10 }}
           {{- end }}
       postKubeadmCommands:
-      - if [ ! -f /etc/kubernetes/super-admin.conf ]; then ln -s /etc/kubernetes/admin.conf
-        /etc/kubernetes/super-admin.conf ; fi
+      - if [ -f /run/cluster-api/bootstrap-success.complete ] && [ -f /etc/kubernetes/admin.conf ] && [ ! -e /etc/kubernetes/super-admin.conf ] && [ ! -L /etc/kubernetes/super-admin.conf ]; then ln -s /etc/kubernetes/admin.conf /etc/kubernetes/super-admin.conf; fi
       preKubeadmCommands:
       - sudo mkdir -p /etc/kubernetes
       - while [ "$(systemctl is-active containerd)" != "active" ]; do echo "Waiting for containerd to come up..."; sleep 3; done
